@@ -1,6 +1,6 @@
 # First Steps to Machine Learning in Python
 The data for this project is available on Kaggle as part of the
-[House Prices: Advanced Regression Techniques] (https://www.kaggle.com/c/house-prices-advanced-regression-techniques)
+[House Prices: Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques)
 
 ## About the files in the dataset
 The folder contains both training and test datasets. For the purposes of this
@@ -18,4 +18,4 @@ dataset into distinct training and test values).
 
 The script is available in the file LearnML.py
 
-The approach is based on the tutorial by [Dan B] (https://www.kaggle.com/dansbecker/random-forests/data)
+The approach is based on the tutorial by [Dan B](https://www.kaggle.com/dansbecker/random-forests/data)
