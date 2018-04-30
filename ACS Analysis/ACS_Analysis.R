@@ -108,9 +108,13 @@ acs_over18[,names(acs_over18) %in% income_features] <-
 ## Perform K-mean clustering of the entire dataset. Start with an arbitrary K
 ## assignment of 10 clusters
 km1 <- kmeans(acs_over18[,4:ncol(acs_over18)], 10)
-png(filename = '/Users/balaji/Downloads/csv_pus/unsum_kmeans.png', width = 838, height = 525)
+png(filename = 'Unsummarized_kmeans.png', width = 838, height = 525)
 autoplot(km1, data = acs_over18[,4:ncol(acs_over18)], label = T, label.size = 3)
 dev.off()
+
+## The plot appears to be completely uninformative and provides no insights
+## whatsoever. Perhaps we could gain more information by summarizing the data over
+## PUMA codes, thus reducing the dimensionality of the data
 
 ## Summarize data over PUMA codes 
 acs_over18 <- as.tibble(acs_over18) 
@@ -123,44 +127,33 @@ tmp = as.data.frame(puma_summary)
 rownames(tmp) = tmp$PUMA
 tmp = tmp[,-1]
 
-
-# Performing K-mean clustering using the summarized data
-km = kmeans(tmp,10)
-autoplot(km, data = tmp, label = TRUE, label.size = 3)
-
-#elbow method
-
+#Determining the optimal Number of clusters by the gap_stat method
+png(filename = 'Cluster_determination_gap_stat.png', width = 838, height = 525)
 set.seed(123)
+fviz_nbclust(tmp, kmeans, method = "gap_stat")
+dev.off()
 
-fviz_nbclust(tmp, kmeans, method = "wss")
-
+## Based on this plot, we can see that the data might optimally cluster into
+## 5 distinct clusters
 set.seed(123)
 final_km <- kmeans(tmp, 5)
-print(final_km)
+png(filename = 'Summarize_KM_5Clusters.png', width = 838, height = 525)
 autoplot(final_km, data = tmp, label = F, label.size = 3)
+dev.off()
 
-
+## Summary stats for the final clustering
 finalKM_summaryStats = tmp %>%
                          mutate(Cluster = final_km$cluster) %>%
                         group_by(Cluster) %>%
                         summarise_all("median")
+print(finalKM_summaryStats)
 
 ###PCA
 # Removing features that show 0 variance
 tmp1 = tmp[,apply(tmp,2,var)!=0]
 pca <- prcomp(tmp1,scale. = T)
 
-png(filename = '/Users/balaji/Downloads/csv_pus/PCA_by_puma.png', width = 838, height = 525)
+png(filename = 'Summarized_PCA_color_by_state.png', width = 838, height = 525)
 infodf <- data.frame(featurename = rownames(tmp1),st=as.factor(acs_over18$ST[match(rownames(tmp1),acs_over18$PUMA)]))
 autoplot(pca, data=infodf,label.label='featurename',label.size=4,label=T,colour="st")
 dev.off()
-
-## histogram of WAGP (wages/salary income past 12 months) per state
-uStates = unique(acs_over18$ST)
-maxWAGP = max(acs_over18$WAGP)
-for(i in 1:length(uStates))
-{
-  temp = acs_over18[acs_over18$ST==uStates[i],]
-  hist(temp$WAGP,xlim=c(0,maxWAGP),las=1,breaks=100)
-  boxplot(temp$WAGP)
-}
